@@ -8,6 +8,7 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Prep (before touching Studio): read the docs to map the flow onto Lamatic nodes.
 
 ## Worked first time
+- Final GraphQL calls from curl, all three samples, ~10s each: billing -> `{category: "billing", confidence: 1}` with the refund window and the Settings > Billing path from the FAQ; bug -> `bug, 0.99`, cites the request ID and P1 rule; feature -> `feature_request, 1`, roadmap policy. Deployed on the edge, logged under Monitor > Logs with tokens and cost per node.
 - `support-ticket-triage` test run: once the `prompts` shape and `searchNode` type were right, all five nodes (API Request, Classify, Search FAQ, Draft reply, API Response) passed on the first Test.
 - Deploy: Deploy button -> tick the two flows -> Purpose -> Deploy; three stages (Jobs, Webhooks, Edge Deployment) finished in about a minute.
 - `faq-ingest` end to end with Gemini: Code -> Vectorize (`gemini-embedding-001`, 3072 dims) -> VectorDB Index into `faq`. Test output: `recordsIndexed: 5, duplicateRecordsDeleted: 0, "Data indexed successfully"`. Per-node cost/timing shown in the execution panel (Embed FAQ 7.3s, Index 6.2s).
