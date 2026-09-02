@@ -22,6 +22,10 @@ support-ticket-triage
 Both flows are in `flows/` as the exact low-code YAML Studio serialises (paste into Flow > Config), plus
 node-by-node notes. Models: `gemini-3.5-flash-lite` for both LLM nodes, `gemini-embedding-001` for embeddings.
 
+## Demo
+
+[demo.mp4 (1m34s)](https://github.com/SarthakB11/customer-support-triage/releases/tag/v1.0) — the Studio build step by step, then the curl calls for the three sample emails.
+
 ## Call it
 
 ```bash
