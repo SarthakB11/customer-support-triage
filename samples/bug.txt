@@ -1,0 +1,3 @@
+Subject: Export keeps failing
+
+Hi, every time I click Export > CSV on the Orders page the spinner runs for about 30 seconds and then I get a red banner saying "Something went wrong (req_8f2a1c)". Started yesterday around 3pm IST. Chrome on Mac. Nothing on your status page. Can you look?
