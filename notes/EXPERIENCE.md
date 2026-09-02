@@ -8,6 +8,7 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Prep (before touching Studio): read the docs to map the flow onto Lamatic nodes.
 
 ## Worked first time
+- `faq-ingest` end to end with Gemini: Code -> Vectorize (`gemini-embedding-001`, 3072 dims) -> VectorDB Index into `faq`. Test output: `recordsIndexed: 5, duplicateRecordsDeleted: 0, "Data indexed successfully"`. Per-node cost/timing shown in the execution panel (Embed FAQ 7.3s, Index 6.2s).
 - Second flow (`support-ticket-triage`) built purely from YAML in the Config editor, with no clicks in node panels, once I knew the undocumented shape: trigger `values.responeType` (sic) + a `schema:` block, and `allConfigs."Config A"` mirroring `values` on every node. Saved with no errors on the first try.
 - Flow **Test**: once the flow saved, Test ran the whole chain without asking for inputs and marked every node "Test Successful", with per-node timing (API Request 3.32s, Code 2.70s, Response 1.88s) and the response JSON `{ "count": 5 }`. The execution panel with Input/Output/Logs per node is good.
 - The flow editor's **Config** button is a Monaco editor holding the flow as low-code YAML. Pasting YAML there and pressing Save renders the nodes on the canvas immediately. This is the fastest way to build a flow, and it is not mentioned anywhere in the quickstart.
@@ -16,6 +17,10 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Docs are on GitHub (`Lamatic/Lamatic-Docs`), so exact node fields could be pulled from the `.mdx` sources when the rendered pages were thin.
 
 ## Did not work (exact error / friction)
+- After adding a model credential, a flow editor tab opened earlier shows no credentials in the node's "Select Credential" list (only "Add Provider"); a page reload fixes it.
+- YAML pasted into Config only re-renders the canvas after the editor has focus and a content change fires; a plain `setValue` from the outside left the canvas stale until nudged.
+- The Vector Store page kept showing `Records: 0` right after a successful index (`recordsIndexed: 5`); needed a reload.
+- Guessing the search node type from the docs pattern (`hybridSearchNode`, `fullTextSearchNode`) gave `vectorSearchNode`, which Studio rejects: "nodeType 'vectorSearchNode' does not exist for node: Search FAQ". The Vector Search docs page never shows its own YAML.
 - Trigger "Response Type": YAML `responseType: realtime` is ignored. Selecting it in the node panel writes a second key, `responeType: realtime` (sic), and that misspelled key is what the save validator checks. Until then Save fails with "Unconfigured GraphQL Response Type — You have to configure graphql trigger response type before saving the flow".
 - Save validation errors surface one at a time (schema, then response type, then "No GraphQL Response Node Found — You have to add a GraphQL response node before saving the flow"), each with a "Get Support" button. Three save attempts to learn three requirements.
 - Saving a flow whose API Request trigger schema was set in YAML (`advance_schema`) fails with the toast "Unconfigured GraphQL Schema — You have to configure graphql trigger schema before saving the flow", with a "Get Support" button on a plain validation error. The docs' `advance_schema` key is not what the validator checks.
