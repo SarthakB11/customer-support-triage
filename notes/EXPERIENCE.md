@@ -3,9 +3,12 @@
 Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 
 ## What I tried
-- Built `faq-ingest` as YAML in the Config editor: API Request trigger -> Code node (5 FAQ entries -> `texts[]` + `metadata[]`) -> API Response. Tested OK. Vectorize + VectorDB Index nodes are next and need an embedding-model credential.
-
-- Prep (before touching Studio): read the docs to map the flow onto Lamatic nodes.
+1. Read the docs (and the `Lamatic/Lamatic-Docs` sources) to map the flow onto Lamatic nodes.
+2. Studio: signed up, skipped onboarding, created Vector Store `faq` (Data > Context Stores).
+3. `faq-ingest`: API Request -> Code (5 FAQ entries) -> Vectorize (Gemini) -> VectorDB Index -> API Response. Built from YAML in Flow > Config.
+4. `support-ticket-triage`: API Request(`email`) -> Generate JSON (category, confidence) + Vector Search (limit 2) -> Generate Text (reply, my tone) -> API Response `{category, confidence, reply}`.
+5. Test in Studio, Deploy (edge), create an API key, call `executeWorkflow` from curl for three sample emails.
+6. Debugged three silent failures (JSON schema format, reserved `id` property, search certainty) by reading Studio's JS bundle; five deploys in total.
 
 ## Worked first time
 - Final GraphQL calls from curl, all three samples, ~10s each: billing -> `{category: "billing", confidence: 1}` with the refund window and the Settings > Billing path from the FAQ; bug -> `bug, 0.99`, cites the request ID and P1 rule; feature -> `feature_request, 1`, roadmap policy. Deployed on the edge, logged under Monitor > Logs with tokens and cost per node.
