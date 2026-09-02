@@ -1,0 +1,193 @@
+triggerNode:
+  nodeId: triggerNode_1
+  nodeType: graphqlNode
+  nodeName: API Request
+  values:
+    responeType: realtime
+    responseType: realtime
+    advance_schema: |-
+      {
+        "email": "string"
+      }
+  modes: {}
+  allConfigs:
+    Config A:
+      id: triggerNode_1
+      nodeName: API Request
+      responeType: realtime
+      responseType: realtime
+      advance_schema: |-
+        {
+          "email": "string"
+        }
+  schema:
+    sampleOutput: string
+nodes:
+  - nodeId: searchNode_1
+    nodeType: searchNode
+    nodeName: Search FAQ
+    values:
+      limit: '2'
+      autocut: '0'
+      filters: '[]'
+      vectorDB: faq
+      searchQuery: '{{triggerNode_1.output.email}}'
+      boostProperties: false
+      embeddingModelName: &ref_0
+        type: embedder/text
+        params: {}
+        model_name: gemini/gemini-embedding-001(3072)
+        credentialId: REPLACE_WITH_YOUR_CREDENTIAL_ID
+        provider_name: gemini
+        credential_name: gemini
+    modes: {}
+    needs:
+      - triggerNode_1
+    allConfigs:
+      Config A:
+        id: searchNode_1
+        limit: '2'
+        autocut: '0'
+        filters: '[]'
+        nodeName: Search FAQ
+        vectorDB: faq
+        searchQuery: '{{triggerNode_1.output.email}}'
+        boostProperties: false
+        embeddingModelName: *ref_0
+    schema: {}
+  - nodeId: InstructorLLMNode_1
+    nodeType: InstructorLLMNode
+    nodeName: Classify
+    values:
+      schema: |-
+        [
+          { "name": "category", "type": "enum", "required": true, "enum": ["bug", "billing", "feature_request"] },
+          { "name": "confidence", "type": "num", "required": true }
+        ]
+      prompts: &ref_1
+        - id: p-system
+          role: system
+          content: >-
+            You triage customer support emails for a SaaS product. Return only
+            the JSON.
+        - id: p-user
+          role: user
+          content: >-
+            Classify this customer support email into exactly one category: bug,
+            billing, feature_request.
+
+            confidence is a number between 0 and 1 for how sure you are.
+
+
+            Email:
+
+            {{triggerNode_1.output.email}}
+      memories: '[]'
+      messages: '[]'
+      attachments: ''
+      generativeModelName: &ref_2
+        - type: generator/text
+          params: {}
+          configName: configA
+          model_name: gemini-3.5-flash-lite
+          credentialId: REPLACE_WITH_YOUR_CREDENTIAL_ID
+          provider_name: gemini
+          credential_name: gemini
+    modes: {}
+    needs:
+      - triggerNode_1
+    allConfigs:
+      Config A:
+        id: InstructorLLMNode_1
+        schema: |-
+          [
+            { "name": "category", "type": "enum", "required": true, "enum": ["bug", "billing", "feature_request"] },
+            { "name": "confidence", "type": "num", "required": true }
+          ]
+        prompts: *ref_1
+        memories: '[]'
+        messages: '[]'
+        nodeName: Classify
+        attachments: ''
+        generativeModelName: *ref_2
+    schema: {}
+  - nodeId: LLMNode_1
+    nodeType: LLMNode
+    nodeName: Draft reply
+    values:
+      prompts: &ref_3
+        - id: p-system
+          role: system
+          content: >-
+            You are Sarthak, replying to a customer support email. Short,
+            direct, first person.
+
+            No filler, no "we apologise for any inconvenience". Use only facts
+            from the FAQ snippets;
+
+            if they do not cover it, say you will check and come back within a
+            day. Max 120 words.
+
+            Plain text, no markdown. Sign off with "Sarthak".
+        - id: p-user
+          role: user
+          content: |-
+            Category: {{InstructorLLMNode_1.output.category}}
+
+            FAQ snippets (only source of facts):
+            {{searchNode_1.output.searchResults}}
+
+            Customer email:
+            {{triggerNode_1.output.email}}
+
+            Write the reply.
+      memories: '[]'
+      messages: '[]'
+      attachments: ''
+      generativeModelName: &ref_4
+        - type: generator/text
+          params: {}
+          configName: configA
+          model_name: gemini-3.5-flash-lite
+          credentialId: REPLACE_WITH_YOUR_CREDENTIAL_ID
+          provider_name: gemini
+          credential_name: gemini
+    modes: {}
+    needs:
+      - InstructorLLMNode_1
+      - searchNode_1
+    allConfigs:
+      Config A:
+        id: LLMNode_1
+        prompts: *ref_3
+        memories: '[]'
+        messages: '[]'
+        nodeName: Draft reply
+        attachments: ''
+        generativeModelName: *ref_4
+    schema: {}
+responseNode:
+  nodeId: responseNode_triggerNode
+  nodeType: graphqlResponseNode
+  nodeName: API Response
+  values:
+    outputMapping: |-
+      {
+        "category": "{{InstructorLLMNode_1.output.category}}",
+        "confidence": "{{InstructorLLMNode_1.output.confidence}}",
+        "reply": "{{LLMNode_1.output.generatedResponse}}"
+      }
+  needs:
+    - LLMNode_1
+  modes: {}
+  allConfigs:
+    Config A:
+      id: responseNode_triggerNode
+      nodeName: API Response
+      outputMapping: |-
+        {
+          "category": "{{InstructorLLMNode_1.output.category}}",
+          "confidence": "{{InstructorLLMNode_1.output.confidence}}",
+          "reply": "{{LLMNode_1.output.generatedResponse}}"
+        }
+  schema: {}

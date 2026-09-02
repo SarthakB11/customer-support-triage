@@ -1,0 +1,137 @@
+triggerNode:
+  nodeId: triggerNode_1
+  nodeType: graphqlNode
+  nodeName: API Request
+  values:
+    responeType: realtime
+    responseType: realtime
+    advance_schema: |-
+      {
+        "run": "string"
+      }
+  modes: {}
+  allConfigs:
+    Config A:
+      id: triggerNode_1
+      nodeName: API Request
+      responeType: realtime
+      responseType: realtime
+      advance_schema: |-
+        {
+          "run": "string"
+        }
+  schema:
+    sampleOutput: string
+nodes:
+  - nodeId: codeNode_1
+    nodeType: codeNode
+    nodeName: FAQ entries
+    values:
+      code: |-
+        const faq = [
+          { id: "faq-1", title: "Login fails or password reset email never arrives", text: "If you cannot log in, use 'Forgot password' on the sign-in page. Reset emails come from no-reply@example.com and can take up to 5 minutes; check spam. If the link says 'expired', request a new one. Still stuck: reply with your account email and the browser you are using." },
+          { id: "faq-2", title: "Refund policy", text: "We refund any monthly charge within 14 days of the charge date, no questions asked. Annual plans are refunded pro-rata for unused months. Refunds go back to the original card in 5-10 business days." },
+          { id: "faq-3", title: "Invoices and changing the billing email", text: "Invoices are under Settings > Billing > Invoices, and are also emailed to the billing contact on the 1st of each month. To change the billing contact or add a VAT/GST number, edit the fields under Settings > Billing > Company details." },
+          { id: "faq-4", title: "Requesting a feature", text: "We track feature requests in our public roadmap. Tell us the problem you are solving, not just the feature, and how often you hit it. Requests with a clear use case are prioritised. We do not promise dates." },
+          { id: "faq-5", title: "Reporting a bug and checking system status", text: "Before reporting, check status.example.com for ongoing incidents. When reporting, include: what you did, what you expected, what happened, the time (with timezone), and a screenshot or the request ID from the error banner. Bugs affecting data or payments are treated as P1." }
+        ];
+        output = {
+          texts: faq.map(f => f.title + ". " + f.text),
+          metadata: faq.map(f => ({ id: f.id, title: f.title, text: f.text }))
+        };
+    modes: {}
+    needs:
+      - triggerNode_1
+    allConfigs:
+      Config A:
+        id: codeNode_1
+        code: |-
+          const faq = [
+            { id: "faq-1", title: "Login fails or password reset email never arrives", text: "If you cannot log in, use 'Forgot password' on the sign-in page. Reset emails come from no-reply@example.com and can take up to 5 minutes; check spam. If the link says 'expired', request a new one. Still stuck: reply with your account email and the browser you are using." },
+            { id: "faq-2", title: "Refund policy", text: "We refund any monthly charge within 14 days of the charge date, no questions asked. Annual plans are refunded pro-rata for unused months. Refunds go back to the original card in 5-10 business days." },
+            { id: "faq-3", title: "Invoices and changing the billing email", text: "Invoices are under Settings > Billing > Invoices, and are also emailed to the billing contact on the 1st of each month. To change the billing contact or add a VAT/GST number, edit the fields under Settings > Billing > Company details." },
+            { id: "faq-4", title: "Requesting a feature", text: "We track feature requests in our public roadmap. Tell us the problem you are solving, not just the feature, and how often you hit it. Requests with a clear use case are prioritised. We do not promise dates." },
+            { id: "faq-5", title: "Reporting a bug and checking system status", text: "Before reporting, check status.example.com for ongoing incidents. When reporting, include: what you did, what you expected, what happened, the time (with timezone), and a screenshot or the request ID from the error banner. Bugs affecting data or payments are treated as P1." }
+          ];
+          output = {
+            texts: faq.map(f => f.title + ". " + f.text),
+            metadata: faq.map(f => ({ id: f.id, title: f.title, text: f.text }))
+          };
+        nodeName: FAQ entries
+    schema: {}
+  - nodeId: vectorizeNode_1
+    nodeType: vectorizeNode
+    nodeName: Embed FAQ
+    values:
+      inputText: '{{codeNode_1.output.texts}}'
+      embeddingModelName: &ref_0
+        type: embedder/text
+        params: {}
+        model_name: gemini/gemini-embedding-001(3072)
+        credentialId: REPLACE_WITH_YOUR_CREDENTIAL_ID
+        provider_name: gemini
+        credential_name: gemini
+    modes: {}
+    needs:
+      - codeNode_1
+    allConfigs:
+      Config A:
+        id: vectorizeNode_1
+        nodeName: Embed FAQ
+        inputText: '{{codeNode_1.output.texts}}'
+        embeddingModelName: *ref_0
+    schema: {}
+    logic: []
+  - nodeId: IndexNode_1
+    nodeType: IndexNode
+    nodeName: Index to faq
+    values:
+      vectorDB: faq
+      primaryKeys: '["id"]'
+      vectorsField: '{{vectorizeNode_1.output.vectors}}'
+      metadataField: '{{codeNode_1.output.metadata}}'
+      duplicateOperation: overwrite
+      embeddingModelName: &ref_1
+        type: embedder/text
+        params: {}
+        model_name: gemini/gemini-embedding-001(3072)
+        credentialId: REPLACE_WITH_YOUR_CREDENTIAL_ID
+        provider_name: gemini
+        credential_name: gemini
+    modes: {}
+    needs:
+      - vectorizeNode_1
+    allConfigs:
+      Config A:
+        id: IndexNode_1
+        nodeName: Index to faq
+        vectorDB: faq
+        primaryKeys: '["id"]'
+        vectorsField: '{{vectorizeNode_1.output.vectors}}'
+        metadataField: '{{codeNode_1.output.metadata}}'
+        duplicateOperation: overwrite
+        embeddingModelName: *ref_1
+    schema: {}
+responseNode:
+  nodeId: responseNode_triggerNode
+  nodeType: graphqlResponseNode
+  nodeName: API Response
+  values:
+    outputMapping: |-
+      {
+        "indexed": "{{codeNode_1.output.texts.length}}",
+        "result": "{{IndexNode_1.output}}"
+      }
+  needs:
+    - IndexNode_1
+  modes: {}
+  allConfigs:
+    Config A:
+      id: responseNode_triggerNode
+      nodeName: API Response
+      outputMapping: |-
+        {
+          "indexed": "{{codeNode_1.output.texts.length}}",
+          "result": "{{IndexNode_1.output}}"
+        }
+  schema: {}
