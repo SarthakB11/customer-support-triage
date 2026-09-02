@@ -1,3 +1,4 @@
 .env
+demo/
 *.cast
-demo/*.mp4
+*.mp4
