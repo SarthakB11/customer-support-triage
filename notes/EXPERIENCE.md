@@ -42,3 +42,4 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Docs: Generate JSON output-reference syntax is only visible in the low-code YAML (`InstructorLLMNode_774`), not stated in prose.
 
 ## One concrete improvement I'd want
+Make the low-code YAML a first-class, documented, validated interface. Concretely: generate the docs' YAML examples from the same node registry Studio ships in its bundle, and have the Config editor reject unknown keys and node types with the message Studio already knows ("nodeType 'vectorSearchNode' does not exist") *before* Save, instead of a red banner after. Every wrong turn I took today (`promptTemplate`, `responseType`, `vectorSearchNode`, JSON Schema vs Zod JSON) would have been a one-line editor error.
