@@ -1,7 +1,7 @@
 # Executes the deployed "support-ticket-triage" flow.
 # `workflowId` = the Flow ID from Studio's Connect/API panel.
 # `email` must match the input name declared on the flow's API Trigger node.
-query TriageTicket($workflowId: String!, $email: String!) {
+query TriageTicket($workflowId: String!, $email: String) {
   executeWorkflow(workflowId: $workflowId, payload: { email: $email }) {
     status
     result

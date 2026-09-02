@@ -10,7 +10,7 @@ done
 
 if [[ $# -ge 1 ]]; then EMAIL="$(cat "$1")"; else EMAIL="$(cat)"; fi
 
-QUERY='query TriageTicket($workflowId: String!, $email: String!) { executeWorkflow(workflowId: $workflowId, payload: { email: $email }) { status result } }'
+QUERY='query TriageTicket($workflowId: String!, $email: String) { executeWorkflow(workflowId: $workflowId, payload: { email: $email }) { status result } }'
 
 BODY="$(python3 - "$QUERY" "$LAMATIC_WORKFLOW_ID" "$EMAIL" <<'PY'
 import json, sys
