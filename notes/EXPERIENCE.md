@@ -7,11 +7,14 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Prep (before touching Studio): read the docs to map the flow onto Lamatic nodes.
 
 ## Worked first time
+- The flow editor's **Config** button is a Monaco editor holding the flow as low-code YAML. Pasting YAML there and pressing Save renders the nodes on the canvas immediately. This is the fastest way to build a flow, and it is not mentioned anywhere in the quickstart.
 - Creating the Vector Store: name + type + Create, toast "Context Store successfully created", store shows `0 cols · 0 rows`.
 
 - Docs are on GitHub (`Lamatic/Lamatic-Docs`), so exact node fields could be pulled from the `.mdx` sources when the rendered pages were thin.
 
 ## Did not work (exact error / friction)
+- Saving a flow whose API Request trigger schema was set in YAML (`advance_schema`) fails with the toast "Unconfigured GraphQL Schema — You have to configure graphql trigger schema before saving the flow", with a "Get Support" button on a plain validation error. The docs' `advance_schema` key is not what the validator checks.
+- New flows open with a 34-step Arcade walkthrough overlay on top of the canvas.
 - Studio at a ~960px-wide window shows only "Best Viewed on Desktop" and nothing else; had to widen the window to 1600px to get past it.
 - Onboarding "Skip" on the Add-a-model step did nothing on first click; navigating to the Studio root got past it.
 - The docs say "Context"; the left nav says "Data" (URL is `/context`). `/data` is a 404.
