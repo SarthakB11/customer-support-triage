@@ -3,10 +3,12 @@
 Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 
 ## What I tried
+- Built `faq-ingest` as YAML in the Config editor: API Request trigger -> Code node (5 FAQ entries -> `texts[]` + `metadata[]`) -> API Response. Tested OK. Vectorize + VectorDB Index nodes are next and need an embedding-model credential.
 
 - Prep (before touching Studio): read the docs to map the flow onto Lamatic nodes.
 
 ## Worked first time
+- Flow **Test**: once the flow saved, Test ran the whole chain without asking for inputs and marked every node "Test Successful", with per-node timing (API Request 3.32s, Code 2.70s, Response 1.88s) and the response JSON `{ "count": 5 }`. The execution panel with Input/Output/Logs per node is good.
 - The flow editor's **Config** button is a Monaco editor holding the flow as low-code YAML. Pasting YAML there and pressing Save renders the nodes on the canvas immediately. This is the fastest way to build a flow, and it is not mentioned anywhere in the quickstart.
 - Creating the Vector Store: name + type + Create, toast "Context Store successfully created", store shows `0 cols · 0 rows`.
 
