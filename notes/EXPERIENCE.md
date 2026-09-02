@@ -13,6 +13,8 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Docs are on GitHub (`Lamatic/Lamatic-Docs`), so exact node fields could be pulled from the `.mdx` sources when the rendered pages were thin.
 
 ## Did not work (exact error / friction)
+- Trigger "Response Type": YAML `responseType: realtime` is ignored. Selecting it in the node panel writes a second key, `responeType: realtime` (sic), and that misspelled key is what the save validator checks. Until then Save fails with "Unconfigured GraphQL Response Type — You have to configure graphql trigger response type before saving the flow".
+- Save validation errors surface one at a time (schema, then response type, then "No GraphQL Response Node Found — You have to add a GraphQL response node before saving the flow"), each with a "Get Support" button. Three save attempts to learn three requirements.
 - Saving a flow whose API Request trigger schema was set in YAML (`advance_schema`) fails with the toast "Unconfigured GraphQL Schema — You have to configure graphql trigger schema before saving the flow", with a "Get Support" button on a plain validation error. The docs' `advance_schema` key is not what the validator checks.
 - New flows open with a 34-step Arcade walkthrough overlay on top of the canvas.
 - Studio at a ~960px-wide window shows only "Best Viewed on Desktop" and nothing else; had to widen the window to 1600px to get past it.
