@@ -24,9 +24,9 @@ node-by-node notes. Models: `gemini-3.5-flash-lite` for both LLM nodes, `gemini-
 
 ## Demo
 
-![Demo: Studio walkthrough, test run, curl calls](docs/demo.gif)
+https://github.com/user-attachments/assets/0dc86b2b-a9d3-4627-b897-ab8825c55c1c
 
-2 min 17 s: the two flows in Studio, the Vector Store with the 5 FAQ entries, a live test run on a real ticket, the retrieved FAQ entries, the endpoint from Setup, then the curl calls for the three sample emails and the request logs. Video files: [docs/demo.mp4](docs/demo.mp4) (720p, in the repo) · [demo.mp4 1080p](https://github.com/SarthakB11/customer-support-triage/releases/download/v1.0/demo.mp4) (release asset).
+2 min 17 s: the two flows in Studio, the Vector Store with the 5 FAQ entries, a live test run on a real ticket, the retrieved FAQ entries, the endpoint from Setup, then the curl calls for the three sample emails and the request logs. Also: [docs/demo.mp4](docs/demo.mp4) (720p) · [1080p on the release](https://github.com/SarthakB11/customer-support-triage/releases/download/v1.0/demo.mp4) · [GIF](docs/demo.gif).
 
 ## Call it
 
