@@ -29,5 +29,5 @@ const faq = [
 
 output = {
   texts: faq.map((f) => `${f.title}. ${f.text}`),
-  metadata: faq.map((f) => ({ id: f.id, title: f.title, text: f.text })),
+  metadata: faq.map((f) => ({ faq_id: f.id, title: f.title, text: f.text })),
 };
