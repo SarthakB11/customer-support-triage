@@ -19,6 +19,8 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Docs are on GitHub (`Lamatic/Lamatic-Docs`), so exact node fields could be pulled from the `.mdx` sources when the rendered pages were thin.
 
 ## Did not work (exact error / friction)
+- Generate JSON schema format: the node panel labels the field "Output Schema (Zod JSON)" and displays `[{name, type: enum|num, ...}]`, but the executor (read from the bundle) parses **JSON Schema** (`type: object/string/number`, `enum`) and throws otherwise. I pasted the Zod-style array and got `{"error": "Unsupported type: undefined"}` as the node output, while the canvas still showed "Test Successful" and the response had `category: ""`. A node that returns an error object must not be marked successful.
+- Flow-level GraphQL call worked first time (`status: success`, ~10s), which made the silent node error harder to notice: the API said success, the JSON just had empty fields.
 - The docs' LLM node YAML (`promptTemplate` + `systemPrompt`) is stale. Studio silently ignores those keys and Save fails with "Unconfigured Classify — Fill required field Prompts before saving the flow". The real key is `prompts: [{id, role, content}]`; I found it by reading the node registry out of Studio's JS bundle.
 - Test with an API Request trigger fails with `Trigger payload type validation failed: payload.email: required field is missing` until you open Test Library and edit the JSON payload; the Test Library has no visible "new test" button, only a search box and an empty list.
 - Deploy dialog: the Deploy button stayed disabled after filling Purpose programmatically; typing into Description enabled it. Minor, but form state is keystroke-driven.
