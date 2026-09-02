@@ -16,7 +16,9 @@ Things the docs do not tell you, learned by reading what Studio serializes:
 - The API Request trigger needs `values.responeType` (sic) and a `schema:` block, or Save fails with "Unconfigured GraphQL Response Type".
 - Every node carries `allConfigs."Config A"` mirroring `values`; the canvas reads from it.
 - LLM nodes take `prompts: [{id, role, content}]`, not `promptTemplate`/`systemPrompt` as in the docs' YAML.
-- Generate JSON's `schema` is "Zod JSON": `[{name, type: enum|num|str|..., required, enum?}]`. A JSON-Schema object is auto-converted once.
+- Generate JSON's `schema` must be standard **JSON Schema** (`type: object`, `properties`, `enum`), even though the panel labels it "Zod JSON" and displays an array form. The array form makes the node return `{"error": "Unsupported type: undefined"}` while still showing "Test Successful".
+- Metadata keys: `id` is reserved in Weaviate. Objects with an `id` property are rejected, the Index node still reports `recordsIndexed: 5`. Use `faq_id`.
+- Vector Search has a `certainty` input (default 0.85) that is not in the docs table; this flow uses 0.5.
 - Vector Search is `nodeType: searchNode`; `vectorSearchNode` does not exist.
 - Output references: `{{InstructorLLMNode_1.output.category}}`, `{{searchNode_1.output.searchResults}}`, `{{LLMNode_1.output.generatedResponse}}`.
 

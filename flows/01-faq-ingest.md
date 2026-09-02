@@ -7,7 +7,7 @@ Build this once, hit **Test**, and the 5 FAQ entries land in the `faq` store.
 Code node  ->  Vectorize  ->  VectorDB (Index)
 ```
 
-Use a plain **API Request** trigger (no inputs needed); we only run it from the editor.
+Use an **API Request** trigger with schema `{"run": "string"}` and Response Type `realtime` (Save refuses an empty schema); run it from the editor or once via the GraphQL API.
 
 ## Node 1 — Code (JavaScript)
 
