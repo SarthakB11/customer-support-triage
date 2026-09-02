@@ -4,9 +4,9 @@ Both flows as exported from Studio's **Config** editor (Flow > Config), i.e. Lam
 Paste into a new flow's Config editor, replace `REPLACE_WITH_YOUR_CREDENTIAL_ID` with the id Studio
 writes when you pick a model credential in any node, then Save.
 
-| File | Flow | Nodes |
-|------|------|-------|
-| `faq-ingest.yaml` | `faq-ingest` (run once) | API Request -> Code (`codeNode`) -> Vectorize (`vectorizeNode`) -> VectorDB Index (`IndexNode`) -> API Response |
+| File                         | Flow                    | Nodes                                                                                                                                            |
+| ---------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `faq-ingest.yaml`            | `faq-ingest` (run once) | API Request -> Code (`codeNode`) -> Vectorize (`vectorizeNode`) -> VectorDB Index (`IndexNode`) -> API Response                                  |
 | `support-ticket-triage.yaml` | `support-ticket-triage` | API Request(`email`) -> Generate JSON (`InstructorLLMNode`) + Vector Search (`searchNode`, limit 2) -> Generate Text (`LLMNode`) -> API Response |
 
 Models used: `gemini-3.5-flash-lite` (chat), `gemini/gemini-embedding-001(3072)` (embeddings). Any provider works; the embedding model must be the same in ingest and search.

@@ -24,7 +24,11 @@ node-by-node notes. Models: `gemini-3.5-flash-lite` for both LLM nodes, `gemini-
 
 ## Demo
 
-[demo.mp4 (1m34s)](https://github.com/SarthakB11/customer-support-triage/releases/tag/v1.0) — the Studio build step by step, then the curl calls for the three sample emails.
+https://github.com/SarthakB11/customer-support-triage/raw/master/docs/demo.mp4
+
+![Demo: Studio walkthrough, test run, curl calls](docs/demo.gif)
+
+2 min 17 s: the two flows in Studio, the Vector Store with the 5 FAQ entries, a live test run on a real ticket, the retrieved FAQ entries, the endpoint from Setup, then the curl calls for the three sample emails and the request logs. Full-resolution file: [demo.mp4 (1080p)](https://github.com/SarthakB11/customer-support-triage/releases/tag/v1.0).
 
 ## Call it
 
@@ -36,12 +40,17 @@ scripts/triage.sh samples/billing.txt
 
 ```json
 {
-  "data": { "executeWorkflow": { "status": "success", "result": {
-    "category": "billing",
-    "confidence": 0.99,
-    "reply": "...",
-    "requestId": "..."
-  } } }
+  "data": {
+    "executeWorkflow": {
+      "status": "success",
+      "result": {
+        "category": "billing",
+        "confidence": 0.99,
+        "reply": "...",
+        "requestId": "..."
+      }
+    }
+  }
 }
 ```
 

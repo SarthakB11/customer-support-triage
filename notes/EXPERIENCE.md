@@ -3,6 +3,7 @@
 Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 
 ## What I tried
+
 1. Read the docs (and the `Lamatic/Lamatic-Docs` sources) to map the flow onto Lamatic nodes.
 2. Studio: signed up, skipped onboarding, created Vector Store `faq` (Data > Context Stores).
 3. `faq-ingest`: API Request -> Code (5 FAQ entries) -> Vectorize (Gemini) -> VectorDB Index -> API Response. Built from YAML in Flow > Config.
@@ -11,6 +12,7 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 6. Debugged three silent failures (JSON schema format, reserved `id` property, search certainty) by reading Studio's JS bundle; five deploys in total.
 
 ## Worked first time
+
 - Final GraphQL calls from curl, all three samples, ~10s each: billing -> `{category: "billing", confidence: 1}` with the refund window and the Settings > Billing path from the FAQ; bug -> `bug, 0.99`, cites the request ID and P1 rule; feature -> `feature_request, 1`, roadmap policy. Deployed on the edge, logged under Monitor > Logs with tokens and cost per node.
 - `support-ticket-triage` test run: once the `prompts` shape and `searchNode` type were right, all five nodes (API Request, Classify, Search FAQ, Draft reply, API Response) passed on the first Test.
 - Deploy: Deploy button -> tick the two flows -> Purpose -> Deploy; three stages (Jobs, Webhooks, Edge Deployment) finished in about a minute.
@@ -23,6 +25,7 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Docs are on GitHub (`Lamatic/Lamatic-Docs`), so exact node fields could be pulled from the `.mdx` sources when the rendered pages were thin.
 
 ## Did not work (exact error / friction)
+
 - Vector Search returned `[]` for every query while the Index node reported `recordsIndexed: 5, "Data indexed successfully"` and the store page showed `Records: 0`. Root cause, found by reading the Index executor in Studio's bundle: batch-insert errors on the last partial batch are caught and discarded, and the node still reports success. Weaviate had rejected every object because my metadata used the reserved property name `id`. Renaming it to `faq_id` made the store fill and the search return 2 hits. Two hours of the platform saying "success" for a write that never happened.
 - Vector Search also has a `certainty` input (default 0.85) that is not in the docs' parameter table; I lowered it to 0.5 while debugging. Worth knowing before you blame the embeddings.
 - Generate JSON schema format: the node panel labels the field "Output Schema (Zod JSON)" and displays `[{name, type: enum|num, ...}]`, but the executor (read from the bundle) parses **JSON Schema** (`type: object/string/number`, `enum`) and throws otherwise. I pasted the Zod-style array and got `{"error": "Unsupported type: undefined"}` as the node output, while the canvas still showed "Test Successful" and the response had `category: ""`. A node that returns an error object must not be marked successful.
@@ -50,4 +53,5 @@ Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
 - Docs: Generate JSON output-reference syntax is only visible in the low-code YAML (`InstructorLLMNode_774`), not stated in prose.
 
 ## One concrete improvement I'd want
-Make the low-code YAML a first-class, documented, validated interface. Concretely: generate the docs' YAML examples from the same node registry Studio ships in its bundle, and have the Config editor reject unknown keys and node types with the message Studio already knows ("nodeType 'vectorSearchNode' does not exist") *before* Save, instead of a red banner after. Every wrong turn I took today (`promptTemplate`, `responseType`, `vectorSearchNode`, JSON Schema vs Zod JSON) would have been a one-line editor error.
+
+Make the low-code YAML a first-class, documented, validated interface. Concretely: generate the docs' YAML examples from the same node registry Studio ships in its bundle, and have the Config editor reject unknown keys and node types with the message Studio already knows ("nodeType 'vectorSearchNode' does not exist") _before_ Save, instead of a red banner after. Every wrong turn I took today (`promptTemplate`, `responseType`, `vectorSearchNode`, JSON Schema vs Zod JSON) would have been a one-line editor error.

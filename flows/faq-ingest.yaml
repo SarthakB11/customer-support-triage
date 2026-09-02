@@ -63,7 +63,7 @@ nodes:
     nodeType: vectorizeNode
     nodeName: Embed FAQ
     values:
-      inputText: '{{codeNode_1.output.texts}}'
+      inputText: "{{codeNode_1.output.texts}}"
       embeddingModelName: &ref_0
         type: embedder/text
         params: {}
@@ -78,7 +78,7 @@ nodes:
       Config A:
         id: vectorizeNode_1
         nodeName: Embed FAQ
-        inputText: '{{codeNode_1.output.texts}}'
+        inputText: "{{codeNode_1.output.texts}}"
         embeddingModelName: *ref_0
     schema: {}
     logic: []
@@ -88,8 +88,8 @@ nodes:
     values:
       vectorDB: faq
       primaryKeys: '["faq_id"]'
-      vectorsField: '{{vectorizeNode_1.output.vectors}}'
-      metadataField: '{{codeNode_1.output.metadata}}'
+      vectorsField: "{{vectorizeNode_1.output.vectors}}"
+      metadataField: "{{codeNode_1.output.metadata}}"
       duplicateOperation: overwrite
       embeddingModelName: &ref_1
         type: embedder/text
@@ -107,8 +107,8 @@ nodes:
         nodeName: Index to faq
         vectorDB: faq
         primaryKeys: '["faq_id"]'
-        vectorsField: '{{vectorizeNode_1.output.vectors}}'
-        metadataField: '{{codeNode_1.output.metadata}}'
+        vectorsField: "{{vectorizeNode_1.output.vectors}}"
+        metadataField: "{{codeNode_1.output.metadata}}"
         duplicateOperation: overwrite
         embeddingModelName: *ref_1
     schema: {}

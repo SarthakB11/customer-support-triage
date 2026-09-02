@@ -27,12 +27,12 @@ nodes:
     nodeType: searchNode
     nodeName: Search FAQ
     values:
-      limit: '2'
-      autocut: '0'
-      filters: ''
+      limit: "2"
+      autocut: "0"
+      filters: ""
       vectorDB: faq
-      certainty: '0.5'
-      searchQuery: '{{triggerNode_1.output.email}}'
+      certainty: "0.5"
+      searchQuery: "{{triggerNode_1.output.email}}"
       boostProperties: false
       embeddingModelName: &ref_0
         type: embedder/text
@@ -47,13 +47,13 @@ nodes:
     allConfigs:
       Config A:
         id: searchNode_1
-        limit: '2'
-        autocut: '0'
-        filters: ''
+        limit: "2"
+        autocut: "0"
+        filters: ""
         nodeName: Search FAQ
         vectorDB: faq
-        certainty: '0.5'
-        searchQuery: '{{triggerNode_1.output.email}}'
+        certainty: "0.5"
+        searchQuery: "{{triggerNode_1.output.email}}"
         boostProperties: false
         embeddingModelName: *ref_0
     schema: {}
@@ -89,9 +89,9 @@ nodes:
             Email:
 
             {{triggerNode_1.output.email}}
-      memories: '[]'
-      messages: '[]'
-      attachments: ''
+      memories: "[]"
+      messages: "[]"
+      attachments: ""
       generativeModelName: &ref_2
         - type: generator/text
           params: {}
@@ -116,10 +116,10 @@ nodes:
             "required": ["category", "confidence"]
           }
         prompts: *ref_1
-        memories: '[]'
-        messages: '[]'
+        memories: "[]"
+        messages: "[]"
         nodeName: Classify
-        attachments: ''
+        attachments: ""
         generativeModelName: *ref_2
     schema: {}
   - nodeId: LLMNode_1
@@ -152,9 +152,9 @@ nodes:
             {{triggerNode_1.output.email}}
 
             Write the reply.
-      memories: '[]'
-      messages: '[]'
-      attachments: ''
+      memories: "[]"
+      messages: "[]"
+      attachments: ""
       generativeModelName: &ref_4
         - type: generator/text
           params: {}
@@ -171,10 +171,10 @@ nodes:
       Config A:
         id: LLMNode_1
         prompts: *ref_3
-        memories: '[]'
-        messages: '[]'
+        memories: "[]"
+        messages: "[]"
         nodeName: Draft reply
-        attachments: ''
+        attachments: ""
         generativeModelName: *ref_4
     schema: {}
 responseNode:
