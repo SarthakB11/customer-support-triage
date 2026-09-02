@@ -8,7 +8,7 @@ API Request trigger (email)
   -> API Response       { category, confidence, reply }
 ```
 
-Node IDs (`triggerNode_1`, `InstructorLLMNode_774`, ...) are assigned by Studio. Type `{{` in any field to pick them from the variable selector instead of typing IDs.
+Node IDs (`triggerNode_1`, `InstructorLLMNode_1`, `searchNode_1`, `LLMNode_1`) are assigned by Studio. The exact config that ran is `support-ticket-triage.yaml`. Type `{{` in any field to pick them from the variable selector instead of typing IDs.
 
 ## Trigger — API Request
 
@@ -55,9 +55,9 @@ Output Schema:
 }
 ```
 
-Outputs: `{{InstructorLLMNode_<A>.output.category}}`, `{{InstructorLLMNode_<A>.output.confidence}}`
+Outputs: `{{InstructorLLMNode_1.output.category}}`, `{{InstructorLLMNode_1.output.confidence}}`
 
-## Node B — Vector Search
+## Node B — Vector Search (`nodeType: searchNode`)
 
 | Field                                  | Value                            |
 | -------------------------------------- | -------------------------------- |
@@ -66,7 +66,7 @@ Outputs: `{{InstructorLLMNode_<A>.output.category}}`, `{{InstructorLLMNode_<A>.o
 | Limit                                  | `2`                              |
 | (Embedding model, if the field exists) | same model as in faq-ingest      |
 
-Output: `{{vectorSearchNode_<B>.output.searchResults}}`
+Output: `{{searchNode_1.output.searchResults}}`
 
 ## Node C — Generate Text (reply)
 
@@ -93,7 +93,7 @@ Customer email:
 Write the reply.
 ```
 
-Output: `{{LLMNode_<C>.output.generatedResponse}}`
+Output: `{{LLMNode_1.output.generatedResponse}}`
 
 ## API Response node
 
