@@ -37,7 +37,7 @@ nodes:
         ];
         output = {
           texts: faq.map(f => f.title + ". " + f.text),
-          metadata: faq.map(f => ({ id: f.id, title: f.title, text: f.text }))
+          metadata: faq.map(f => ({ faq_id: f.id, title: f.title, text: f.text }))
         };
     modes: {}
     needs:
@@ -55,7 +55,7 @@ nodes:
           ];
           output = {
             texts: faq.map(f => f.title + ". " + f.text),
-            metadata: faq.map(f => ({ id: f.id, title: f.title, text: f.text }))
+            metadata: faq.map(f => ({ faq_id: f.id, title: f.title, text: f.text }))
           };
         nodeName: FAQ entries
     schema: {}
@@ -87,7 +87,7 @@ nodes:
     nodeName: Index to faq
     values:
       vectorDB: faq
-      primaryKeys: '["id"]'
+      primaryKeys: '["faq_id"]'
       vectorsField: '{{vectorizeNode_1.output.vectors}}'
       metadataField: '{{codeNode_1.output.metadata}}'
       duplicateOperation: overwrite
@@ -106,12 +106,13 @@ nodes:
         id: IndexNode_1
         nodeName: Index to faq
         vectorDB: faq
-        primaryKeys: '["id"]'
+        primaryKeys: '["faq_id"]'
         vectorsField: '{{vectorizeNode_1.output.vectors}}'
         metadataField: '{{codeNode_1.output.metadata}}'
         duplicateOperation: overwrite
         embeddingModelName: *ref_1
     schema: {}
+    logic: []
 responseNode:
   nodeId: responseNode_triggerNode
   nodeType: graphqlResponseNode

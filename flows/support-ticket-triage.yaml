@@ -29,8 +29,9 @@ nodes:
     values:
       limit: '2'
       autocut: '0'
-      filters: '[]'
+      filters: ''
       vectorDB: faq
+      certainty: '0.5'
       searchQuery: '{{triggerNode_1.output.email}}'
       boostProperties: false
       embeddingModelName: &ref_0
@@ -48,22 +49,28 @@ nodes:
         id: searchNode_1
         limit: '2'
         autocut: '0'
-        filters: '[]'
+        filters: ''
         nodeName: Search FAQ
         vectorDB: faq
+        certainty: '0.5'
         searchQuery: '{{triggerNode_1.output.email}}'
         boostProperties: false
         embeddingModelName: *ref_0
     schema: {}
+    logic: []
   - nodeId: InstructorLLMNode_1
     nodeType: InstructorLLMNode
     nodeName: Classify
     values:
       schema: |-
-        [
-          { "name": "category", "type": "enum", "required": true, "enum": ["bug", "billing", "feature_request"] },
-          { "name": "confidence", "type": "num", "required": true }
-        ]
+        {
+          "type": "object",
+          "properties": {
+            "category": { "type": "string", "enum": ["bug", "billing", "feature_request"], "description": "ticket category" },
+            "confidence": { "type": "number", "description": "0 to 1" }
+          },
+          "required": ["category", "confidence"]
+        }
       prompts: &ref_1
         - id: p-system
           role: system
@@ -100,10 +107,14 @@ nodes:
       Config A:
         id: InstructorLLMNode_1
         schema: |-
-          [
-            { "name": "category", "type": "enum", "required": true, "enum": ["bug", "billing", "feature_request"] },
-            { "name": "confidence", "type": "num", "required": true }
-          ]
+          {
+            "type": "object",
+            "properties": {
+              "category": { "type": "string", "enum": ["bug", "billing", "feature_request"], "description": "ticket category" },
+              "confidence": { "type": "number", "description": "0 to 1" }
+            },
+            "required": ["category", "confidence"]
+          }
         prompts: *ref_1
         memories: '[]'
         messages: '[]'
