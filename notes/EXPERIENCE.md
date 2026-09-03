@@ -1,57 +1,55 @@
-# Experience notes
+# Experience
 
-Running log of the 20-minute Lamatic.ai evaluation. Updated after each step.
+Running notes from the Lamatic.ai evaluation. Planned as twenty minutes, it took about two hours.
 
 ## What I tried
 
-1. Read the docs (and the `Lamatic/Lamatic-Docs` sources) to map the flow onto Lamatic nodes.
-2. Studio: signed up, skipped onboarding, created Vector Store `faq` (Data > Context Stores).
-3. `faq-ingest`: API Request -> Code (5 FAQ entries) -> Vectorize (Gemini) -> VectorDB Index -> API Response. Built from YAML in Flow > Config.
-4. `support-ticket-triage`: API Request(`email`) -> Generate JSON (category, confidence) + Vector Search (limit 2) -> Generate Text (reply, my tone) -> API Response `{category, confidence, reply}`.
-5. Test in Studio, Deploy (edge), create an API key, call `executeWorkflow` from curl for three sample emails.
-6. Debugged three silent failures (JSON schema format, reserved `id` property, search certainty) by reading Studio's JS bundle; five deploys in total.
+1. Read the docs, and the Lamatic-Docs sources on GitHub, to map the flow onto Lamatic nodes.
+2. Signed up in Studio, skipped onboarding, and created a Vector Store called `faq` under Data > Context Stores.
+3. Built `faq-ingest`: API Request, a Code node with the 5 FAQ entries, Vectorize with Gemini, VectorDB Index, API Response. I wrote it as YAML in Flow > Config.
+4. Built `support-ticket-triage`: API Request with an `email` field, Generate JSON for category and confidence, Vector Search with limit 2, Generate Text for the reply, API Response returning `{category, confidence, reply}`.
+5. Tested in Studio, deployed to the edge, created an API key, and called `executeWorkflow` from curl with three sample emails.
+6. Debugged three silent failures (the JSON schema format, a reserved `id` property, the search certainty threshold) by reading Studio's JS bundle. Five deploys in total.
 
 ## Worked first time
 
-- Final GraphQL calls from curl, all three samples, ~10s each: billing -> `{category: "billing", confidence: 1}` with the refund window and the Settings > Billing path from the FAQ; bug -> `bug, 0.99`, cites the request ID and P1 rule; feature -> `feature_request, 1`, roadmap policy. Deployed on the edge, logged under Monitor > Logs with tokens and cost per node.
-- `support-ticket-triage` test run: once the `prompts` shape and `searchNode` type were right, all five nodes (API Request, Classify, Search FAQ, Draft reply, API Response) passed on the first Test.
-- Deploy: Deploy button -> tick the two flows -> Purpose -> Deploy; three stages (Jobs, Webhooks, Edge Deployment) finished in about a minute.
-- `faq-ingest` end to end with Gemini: Code -> Vectorize (`gemini-embedding-001`, 3072 dims) -> VectorDB Index into `faq`. Test output: `recordsIndexed: 5, duplicateRecordsDeleted: 0, "Data indexed successfully"`. Per-node cost/timing shown in the execution panel (Embed FAQ 7.3s, Index 6.2s).
-- Second flow (`support-ticket-triage`) built purely from YAML in the Config editor, with no clicks in node panels, once I knew the undocumented shape: trigger `values.responeType` (sic) + a `schema:` block, and `allConfigs."Config A"` mirroring `values` on every node. Saved with no errors on the first try.
-- Flow **Test**: once the flow saved, Test ran the whole chain without asking for inputs and marked every node "Test Successful", with per-node timing (API Request 3.32s, Code 2.70s, Response 1.88s) and the response JSON `{ "count": 5 }`. The execution panel with Input/Output/Logs per node is good.
-- The flow editor's **Config** button is a Monaco editor holding the flow as low-code YAML. Pasting YAML there and pressing Save renders the nodes on the canvas immediately. This is the fastest way to build a flow, and it is not mentioned anywhere in the quickstart.
-- Creating the Vector Store: name + type + Create, toast "Context Store successfully created", store shows `0 cols · 0 rows`.
+- The final curl calls, all three samples, about 10 seconds each. Billing came back as `{category: "billing", confidence: 1}` with the refund window and the Settings > Billing path from the FAQ. Bug came back as `bug, 0.99`, and the reply cites the request ID and the P1 rule. Feature came back as `feature_request, 1` with the roadmap policy. Every call shows up under Monitor > Logs with tokens and cost per node.
+- The `support-ticket-triage` test run. Once the `prompts` shape and the `searchNode` type were right, all five nodes passed on the first Test.
+- Deploy. Tick the flows, type a purpose, click Deploy. Jobs, Webhooks and Edge Deployment took about a minute.
+- `faq-ingest` end to end with Gemini: Code, Vectorize (`gemini-embedding-001`, 3072 dims), VectorDB Index into `faq`. The test reported `recordsIndexed: 5` and showed cost and timing per node (Embed FAQ 7.3s, Index 6.2s).
+- Building the second flow purely from YAML in the Config editor, with no clicks in node panels, once I knew the shape Studio wants: `responeType` (sic) on the trigger, a `schema:` block, and `allConfigs."Config A"` mirroring `values` on every node. It saved with no errors on the first try.
+- Flow Test. It ran the whole chain without asking for inputs, marked every node, and showed timing per node plus the response JSON. The execution panel with Input, Output and Logs per node is good.
+- The Config button. It is a Monaco editor holding the flow as low code YAML. Paste, Save, and the nodes appear on the canvas. It is the fastest way to build a flow, and the quickstart never mentions it.
+- Creating the Vector Store: name, type, Create.
+- The docs live on GitHub (`Lamatic/Lamatic-Docs`), so I could pull exact node fields from the `.mdx` sources when the rendered pages were thin.
 
-- Docs are on GitHub (`Lamatic/Lamatic-Docs`), so exact node fields could be pulled from the `.mdx` sources when the rendered pages were thin.
+## Did not work (exact error or friction)
 
-## Did not work (exact error / friction)
-
-- Vector Search returned `[]` for every query while the Index node reported `recordsIndexed: 5, "Data indexed successfully"` and the store page showed `Records: 0`. Root cause, found by reading the Index executor in Studio's bundle: batch-insert errors on the last partial batch are caught and discarded, and the node still reports success. Weaviate had rejected every object because my metadata used the reserved property name `id`. Renaming it to `faq_id` made the store fill and the search return 2 hits. Two hours of the platform saying "success" for a write that never happened.
-- Vector Search also has a `certainty` input (default 0.85) that is not in the docs' parameter table; I lowered it to 0.5 while debugging. Worth knowing before you blame the embeddings.
-- Generate JSON schema format: the node panel labels the field "Output Schema (Zod JSON)" and displays `[{name, type: enum|num, ...}]`, but the executor (read from the bundle) parses **JSON Schema** (`type: object/string/number`, `enum`) and throws otherwise. I pasted the Zod-style array and got `{"error": "Unsupported type: undefined"}` as the node output, while the canvas still showed "Test Successful" and the response had `category: ""`. A node that returns an error object must not be marked successful.
-- Flow-level GraphQL call worked first time (`status: success`, ~10s), which made the silent node error harder to notice: the API said success, the JSON just had empty fields.
-- The docs' LLM node YAML (`promptTemplate` + `systemPrompt`) is stale. Studio silently ignores those keys and Save fails with "Unconfigured Classify — Fill required field Prompts before saving the flow". The real key is `prompts: [{id, role, content}]`; I found it by reading the node registry out of Studio's JS bundle.
-- Test with an API Request trigger fails with `Trigger payload type validation failed: payload.email: required field is missing` until you open Test Library and edit the JSON payload; the Test Library has no visible "new test" button, only a search box and an empty list.
-- Deploy dialog: the Deploy button stayed disabled after filling Purpose programmatically; typing into Description enabled it. Minor, but form state is keystroke-driven.
-- After adding a model credential, a flow editor tab opened earlier shows no credentials in the node's "Select Credential" list (only "Add Provider"); a page reload fixes it.
-- YAML pasted into Config only re-renders the canvas after the editor has focus and a content change fires; a plain `setValue` from the outside left the canvas stale until nudged.
-- The Vector Store page kept showing `Records: 0` right after a successful index (`recordsIndexed: 5`); needed a reload.
-- Guessing the search node type from the docs pattern (`hybridSearchNode`, `fullTextSearchNode`) gave `vectorSearchNode`, which Studio rejects: "nodeType 'vectorSearchNode' does not exist for node: Search FAQ". The Vector Search docs page never shows its own YAML.
-- Trigger "Response Type": YAML `responseType: realtime` is ignored. Selecting it in the node panel writes a second key, `responeType: realtime` (sic), and that misspelled key is what the save validator checks. Until then Save fails with "Unconfigured GraphQL Response Type — You have to configure graphql trigger response type before saving the flow".
-- Save validation errors surface one at a time (schema, then response type, then "No GraphQL Response Node Found — You have to add a GraphQL response node before saving the flow"), each with a "Get Support" button. Three save attempts to learn three requirements.
-- Saving a flow whose API Request trigger schema was set in YAML (`advance_schema`) fails with the toast "Unconfigured GraphQL Schema — You have to configure graphql trigger schema before saving the flow", with a "Get Support" button on a plain validation error. The docs' `advance_schema` key is not what the validator checks.
-- New flows open with a 34-step Arcade walkthrough overlay on top of the canvas.
-- Studio at a ~960px-wide window shows only "Best Viewed on Desktop" and nothing else; had to widen the window to 1600px to get past it.
-- Onboarding "Skip" on the Add-a-model step did nothing on first click; navigating to the Studio root got past it.
-- The docs say "Context"; the left nav says "Data" (URL is `/context`). `/data` is a 404.
+- Vector Search returned `[]` for every query while the Index node reported `recordsIndexed: 5, "Data indexed successfully"` and the store page showed `Records: 0`. I found the cause in the Index executor in Studio's bundle: batch insert errors on the last partial batch are caught and dropped, and the node still reports success. Weaviate had rejected every object because my metadata used the reserved property name `id`. Renaming it to `faq_id` filled the store and the search returned two hits. Two hours of the platform saying "success" for a write that never happened.
+- Vector Search also has a `certainty` input, default 0.85, that the docs' parameter table does not list. I lowered it to 0.5 while debugging. Worth knowing before you blame the embeddings.
+- Generate JSON schema format. The panel labels the field "Output Schema (Zod JSON)" and displays `[{name, type: enum|num, ...}]`, but the executor parses JSON Schema (`type: object/string/number`, `enum`) and throws on anything else. I pasted the Zod style array and the node returned `{"error": "Unsupported type: undefined"}` while the canvas still said "Test Successful" and the API response had `category: ""`. A node that returns an error object should not be marked successful.
+- The GraphQL call itself said `status: success` on the first try, which hid the empty fields.
+- The docs' LLM node YAML (`promptTemplate` plus `systemPrompt`) is stale. Studio ignores those keys and Save fails with the toast "Unconfigured Classify" / "Fill required field Prompts before saving the flow". The real key is `prompts: [{id, role, content}]`. I found it in the node registry inside Studio's JS bundle.
+- Test with an API Request trigger fails with `Trigger payload type validation failed: payload.email: required field is missing` until you open Test Library and edit the JSON payload. The Test Library has no visible "new test" button, only a search box and an empty list.
+- In the Deploy dialog the Deploy button stayed disabled after I filled Purpose programmatically. Typing into Description enabled it. Minor, but the form state is keystroke driven.
+- A flow editor tab opened before I added a model credential shows only "Add Provider" in the node's Select Credential list. A reload fixes it.
+- YAML pasted into Config only re-renders the canvas after the editor has focus and a content change fires. A plain `setValue` from outside left the canvas stale until nudged.
+- The Vector Store page kept showing `Records: 0` right after a successful index. It needed a reload.
+- Guessing the search node type from the docs pattern (`hybridSearchNode`, `fullTextSearchNode`) gave `vectorSearchNode`, which Studio rejects: "nodeType 'vectorSearchNode' does not exist for node: Search FAQ". The Vector Search docs page never shows its own YAML. The real type is `searchNode`.
+- Trigger Response Type. YAML `responseType: realtime` is ignored. Picking it in the node panel writes a second key, `responeType: realtime` (sic), and that misspelled key is what the save validator checks. Until then Save fails with "Unconfigured GraphQL Response Type" / "You have to configure graphql trigger response type before saving the flow".
+- Save validation errors arrive one at a time (schema, then response type, then "No GraphQL Response Node Found" / "You have to add a GraphQL response node before saving the flow"), each with a "Get Support" button. Three save attempts to learn three requirements.
+- Setting the trigger schema in YAML alone (`advance_schema`) fails with "Unconfigured GraphQL Schema" / "You have to configure graphql trigger schema before saving the flow". The docs' `advance_schema` key is not what the validator checks.
+- New flows open under a 34 step Arcade walkthrough on top of the canvas.
+- At about 960px wide, Studio shows only "Best Viewed on Desktop". I had to widen the window to 1600px.
+- Onboarding "Skip" on the Add a model step did nothing on the first click. Going to the Studio root got past it.
+- The docs say "Context", the left nav says "Data", the URL is `/context`, and `/data` is a 404.
 - The "Help & Support" modal opens by itself on every page load in a fresh project and sits on top of the page.
-- Models > Default Models: provider dropdown is empty until you add a credential, so there is no zero-key path to a first test.
-
-- Studio login page (`studio.lamatic.ai/login`): before signing in you get a cookie modal, a Cloudflare Turnstile check, and a Featurebase NPS survey ("How likely are you to recommend us to a friend?") stacked on the same screen. Three interruptions before the first click.
-- Docs: the **Vector Search Node** page is a copy of the Keyword Search page. Its Setup section says "Select the Keyword Search Node" and the low-code example is `nodeType: fullTextSearchNode`, `nodeName: Keyword Search`. It also does not say whether the node needs an embedding model or reuses the store's.
-- Docs: "Mapping and Ingesting Data" (`/docs/context/vectordb/adding-data`) is conceptual. It never says how a handful of records get into a store, so a second flow (Code -> Vectorize -> VectorDB Index) had to be inferred from the node pages.
-- Docs: Generate JSON output-reference syntax is only visible in the low-code YAML (`InstructorLLMNode_774`), not stated in prose.
+- Models > Default Models: the provider dropdown is empty until you add a credential, so there is no zero key path to a first test.
+- The login page stacks a cookie modal, a Cloudflare Turnstile check and a Featurebase NPS survey ("How likely are you to recommend us to a friend?") on the same screen. Three interruptions before the first click.
+- Docs: the Vector Search Node page is a copy of the Keyword Search page. Its Setup section says "Select the Keyword Search Node" and the low code example is `nodeType: fullTextSearchNode`. It also does not say whether the node needs its own embedding model.
+- Docs: "Mapping and Ingesting Data" is conceptual. It never says how a handful of records get into a store, so I had to infer the second flow (Code, Vectorize, VectorDB Index) from the node pages.
+- Docs: the Generate JSON output reference syntax only appears in the low code YAML (`InstructorLLMNode_774`), never in prose.
 
 ## One concrete improvement I'd want
 
-Make the low-code YAML a first-class, documented, validated interface. Concretely: generate the docs' YAML examples from the same node registry Studio ships in its bundle, and have the Config editor reject unknown keys and node types with the message Studio already knows ("nodeType 'vectorSearchNode' does not exist") _before_ Save, instead of a red banner after. Every wrong turn I took today (`promptTemplate`, `responseType`, `vectorSearchNode`, JSON Schema vs Zod JSON) would have been a one-line editor error.
+Make the low code YAML a documented, validated interface. Generate the docs' YAML examples from the node registry Studio already ships in its bundle, and have the Config editor reject unknown keys and node types before Save, with the message Studio already knows ("nodeType 'vectorSearchNode' does not exist"), instead of a red banner after. Every wrong turn I took (`promptTemplate`, `responseType`, `vectorSearchNode`, JSON Schema vs Zod JSON, the reserved `id`) would have been a one line editor error.
